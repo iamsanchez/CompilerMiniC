@@ -1,0 +1,314 @@
+package lexico;
+import java.io.*;
+import java_cup.runtime.*; 
+import AST.*;
+
+parser code
+{:
+
+	public void syntax_error(Symbol s){
+		report_error("Error de sintaxis. Linea: " + (s.right + 1) +
+		" Columna: " + s.left + ". Texto: \"" + s.value + "\"", null);
+	}
+
+
+	  public void report_fatal_error(String message, Object info) {
+    report_error(message, info);
+    throw new RuntimeException("Fatal Syntax Error");
+  }
+:}
+// LBRACE {
+terminal  IF, ELSE, FOR, WHILE, RETURN, VOID, CHAR, STRING, SCANF, PRINTF, BREAK,DFLAG, SFLAG, CFLAG;
+terminal   NOTEQ, EQEQ, GT, LT, GTEQ, LTEQ, OROR, ANDAND, NOT, OR, AND;
+terminal  EQ, PLUSEQ, MINUSEQ, MULTEQ, DIVEQ;
+terminal  SEMICOLON, COMMA, LBRACE, RBRACE, LPAREN, RPAREN, LBRACK, RBRACK;
+terminal String CONSTSTR, CONSTCHAR, IDENTIFIER;
+terminal  PLUS, PLUSPLUS, MINUSMINUS, MINUS, MULT, DIV, INT;
+terminal  MAIN ;
+terminal String Number;
+
+non terminal arg_list;
+non terminal args;
+non terminal assignment_expression;
+non terminal assignment_expressionP;
+non terminal assignment_statement;
+non terminal Boolean_Expression boolean_expression;
+non terminal condition;
+non terminal conditionP;
+non terminal Constant constant;
+non terminal E1;
+non terminal E2;
+non terminal E3;
+non terminal expr_for;
+non terminal expr_increment;
+non terminal Expression expr;
+non terminal ExpressionP exprP;
+non terminal Factor factor;
+non terminal Flag flags;
+non terminal for_statement;
+non terminal function_call;
+non terminal function_call_statement;
+//non terminal function_declaration;
+non terminal Function_Definition_List function_definition;
+non terminal If_Statement if_statement;
+non terminal inc;
+non terminal inc_special;
+non terminal increment;
+non terminal incrementP,arg_listP;
+non terminal init_for;
+non terminal init_forP;
+non terminal Jump_Statement jump_statement;
+non terminal Logical_Expression logical_expression;
+non terminal Logical_Operator logical_operators;
+non terminal Main_Function Main_Function;
+non terminal Param_Id param_id;
+non terminal Param_List param_list;
+non terminal Param_List_P param_listP;
+non terminal Param_Type_List param_type_list;
+non terminal Params params;
+non terminal PrintF printf_statement;
+non terminal Relational_Expression relational_expression;
+non terminal Relational_Operator relational_operators;
+//non terminal S;
+non terminal ScanF scanf_statement;
+non terminal Statement statement;
+non terminal Statement_Inside_If statement_inside_if;
+non terminal Statement_Inside_While statement_inside_while;
+non terminal Statement_List statement_list;
+non terminal Term term;
+non terminal TermP termP;
+non terminal Type type;
+non terminal Variable variable;
+non terminal Variable_Declaration variable_declaration ;
+non terminal Variable_Init variable_initialization;
+non terminal Variable_List variable_list;
+non terminal While_Statement while_statement;
+//S::= function_declaration S | Main_Function;
+
+
+Main_Function ::= INT MAIN LPAREN params:p RPAREN LBRACE statement_list:sl RETURN expr SEMICOLON RBRACE function_definition:fdl {:RESULT = new Main_Function(fdl,p,sl);	:}
+				
+				;
+variable_declaration ::= type variable_list SEMICOLON
+					| type error {: parser.report_error("variable_declarators" ,"WRONG"); :} SEMICOLON
+					| type error 
+      {: parser.report_error("variable_declarators" ,"WRONG"); :}
+    statement ;
+
+expr ::= term:t exprP:e					{:RESULT = new Expression(t,e);:};
+exprP ::= PLUS term:t exprP:e 			{:RESULT = new OPlus(t,e);:}
+		| MINUS term:t exprP:e			{:RESULT = new OMinus(t,e);:}
+		|
+		;
+//expr ::= expr PLUS term | expr MINUS term | term;
+term ::= factor:f termP:t 			{:RESULT = new Term(f,t);:}
+		;
+
+termP ::= MULT factor:f termP:p 	{:RESULT = new OMult(f,p);:}				
+		| DIV factor:f termP:p 		{:RESULT = new OMult(f,p);:}
+		| 
+		;
+
+//term ::= term MULT factor | term DIV factor | factor;
+factor ::=variable:v 				{:RESULT = new Variable_To_Factor(v);:}	
+		| LPAREN expr:e RPAREN		{:RESULT = new Factor_Expression(e);:}
+		| constant:c 				{:RESULT = c;:}					
+		| function_call ;
+
+variable_list ::=   variable_list:list COMMA variable_initialization:v {:list.add_init(v); RESULT = list;:} 
+			| variable_initialization:v {:RESULT = new Variable_List(v);:};
+			
+variable ::= IDENTIFIER:id 					{:RESULT = new Variable_Identifier(id);:}
+			|IDENTIFIER:id LBRACK expr:e RBRACK {:RESULT = new Variable_ArrayID(id,e);:}
+			;
+
+//variable_initialization ::= variable variable_initializationP
+//						|
+//						;
+//variable_initializationP ::= EQ expr variable_initializationP
+//						| 
+//						;
+
+variable_initialization ::= variable_initialization:v EQ expr:e {:RESULT = new Variable_Init_Expression(v,e);:}
+						| variable:v  	{:RESULT = v;:} ;
+
+
+type ::= INT 							{:RESULT = new Type_Int();:}
+	| STRING 							{:RESULT = new Type_String();:}
+	| CHAR								{:RESULT = new Type_Char();:}
+	| VOID 								{:RESULT = new Type_Void();:}
+	;
+
+
+jump_statement ::= BREAK SEMICOLON 		{:RESULT = new Jump_Break();:}
+				| RETURN SEMICOLON 		{:RESULT = new Jump_Return();:}
+				| RETURN expr:e SEMICOLON {:RESULT = new Jump_Return_Expr(e);:};
+
+
+if_statement ::= IF LPAREN boolean_expression:b RPAREN statement_inside_if:s {:RESULT = new If_Statement(b,s);:}
+				| IF error  {: parser.report_error("expression" ,"WRONG"); :} RPAREN statement_inside_if ;
+
+statement_list ::= statement_list:list statement:s {:list.add(s); RESULT = list;:}
+				| {:RESULT = new Statement_List();:};
+
+statement::= if_statement:s 							{:RESULT = s;:}
+		| jump_statement:s							{:RESULT = s;:}
+		| assignment_statement 
+		| function_call_statement 
+		| for_statement
+		| variable_declaration:s 					{:RESULT = s;:}
+		| while_statement:s 						{:RESULT = s;:}
+		| printf_statement:s 						{:RESULT = s;:}
+		| scanf_statement:s 						{:RESULT = s;:};
+
+statement_inside_if ::= LBRACE statement_list:s RBRACE {:RESULT = new Statement_Inside_If_Simple(s);:}
+					| LBRACE statement_list:s1 RBRACE ELSE LBRACE statement_list:s2 RBRACE  {:RESULT = new Statement_Inside_If_Complex(s1,s2);:};
+
+printf_statement ::= PRINTF LPAREN CONSTSTR:c COMMA expr:e RPAREN SEMICOLON {:RESULT = new PrintFExpr(e,c);:}
+				| PRINTF LPAREN CONSTSTR:c RPAREN SEMICOLON  				{:RESULT = new PrintFString(c);:};
+
+scanf_statement ::=  SCANF LPAREN  flags:f COMMA variable:v RPAREN SEMICOLON    {:RESULT = new ScanF(f,v);:};
+
+flags ::= DFLAG  {:RESULT = new FlagD();:}
+	| SFLAG 	 {:RESULT = new FlagS();:}
+	| CFLAG 	 {:RESULT = new FlagC();:}	;
+
+boolean_expression ::= relational_expression:rl logical_expression:le {:RESULT = new Boolean_Expression(rl,le);:};
+
+
+relational_expression ::=  expr:e1 relational_operators:r expr:e2 {:RESULT = new Relational_Expression(e1,e2,r);:}
+							| LPAREN relational_expression:rl RPAREN {:RESULT = rl;:}
+							| error 
+      {: parser.report_error("relational_expression","WRONG"); :} 
+    LT expr
+  | error 
+      {: parser.report_error("relational_expression","WRONG"); :} 
+    GT expr
+  | error 
+      {: parser.report_error("relational_expression","WRONG"); :} 
+    LTEQ expr
+  | error 
+      {: parser.report_error("relational_expression" ,"WRONG"); :} 
+    GTEQ expr ;
+
+relational_operators ::=  LTEQ      {:RESULT = new Operator_LTEQ();:}
+					| LT 			{:RESULT = new Operator_LT();:}
+					| GT 			{:RESULT = new Operator_GT();:}
+					| GTEQ 			{:RESULT = new Operator_GTEQ();:}
+					| EQEQ 			{:RESULT = new Operator_EQEQ();:}
+					| NOTEQ			{:RESULT = new Operator_NOTEQ();:};
+
+logical_expression ::= logical_operators:lo boolean_expression:bo {:RESULT = new Logical_Expression(lo,bo);:}
+					|	{:RESULT = new Logical_Expression();:};
+
+logical_operators ::= ANDAND 		{:RESULT = new Logical_AND();:}
+					| OROR		{:RESULT = new Logical_OR();:}
+					;
+
+//function_definition_list ::= function_definition |  function_definition function_definition_list |;
+
+function_definition ::= type:t IDENTIFIER:id LPAREN params:p RPAREN LBRACE statement_list:sl RBRACE function_definition:list  {:list.add(new Function_Definition(t,p,sl)); RESULT = list;:}
+					|  {:RESULT = new Function_Definition_List();:}
+					;
+
+
+assignment_statement ::= assignment_expression SEMICOLON;
+
+assignment_expression ::= variable_initialization assignment_expressionP
+						| expr_increment assignment_expressionP
+						;
+
+assignment_expressionP ::= variable_initialization assignment_expressionP
+					| 
+						;						
+//assignment_expression ::= variable_initialization| expr_increment | assignment_expression variable_initialization ;
+params ::= param_list:list 										{:RESULT = new Params(list);:}
+		| {:RESULT = new Params();:};
+
+param_list ::= param_type_list:p param_listP:list 			{:list.add(p); RESULT = list;:}
+			| error 
+      {: parser.report_error("formal_parameter_list","WRONG"); :} 
+    COMMA param_type_list param_listP;
+
+param_listP ::= COMMA param_type_list:p param_listP:list	{:list.add(p); RESULT = list;:}
+			|			{:RESULT = new Param_List_P();:}
+			
+			;
+
+//param_list ::= param_list COMMA param_type_list | param_type_list;
+param_type_list ::= type:t param_id:id 					{:RESULT = new Param_Type_List(t,id);:};
+param_id ::= IDENTIFIER:id 							{:RESULT = new Param_Id_Identifier(id);:}
+		| IDENTIFIER:id LBRACK RBRACK 				{:RESULT = new Param_Id_Array(id);:};
+
+while_statement ::= WHILE LPAREN boolean_expression:b RPAREN statement_inside_while:s {:RESULT = new While_Statement(b,s);:}
+			| WHILE error 
+      {: parser.report_error("expression" , "WRONG"); :}
+    RPAREN statement;
+
+statement_inside_while ::= LBRACE statement_list:sl RBRACE    {:RESULT = new Statement_Inside_While(sl);:};
+
+for_statement ::= FOR LPAREN expr_for RPAREN LBRACE statement_list RBRACE;
+
+expr_for ::= E1 SEMICOLON E2 SEMICOLON E3
+			;
+
+E1 ::= init_for| ;
+E2 ::= condition| ;
+E3 ::= increment| ;
+
+
+constant ::= CONSTCHAR:c {:RESULT = new Literal_Char(c);:}
+		| CONSTSTR:s 	{:RESULT = new Literal_String(s);:}
+		| Number:i		{:RESULT = new Literal_Integer(i);:}
+		;
+
+
+init_for ::= INT assignment_expression init_forP
+			| assignment_expression
+			;
+
+init_forP ::= COMMA INT assignment_expression init_forP
+			| COMMA assignment_expression
+			|
+			; 			
+//init_for ::= init_for COMMA INT assignment_expression| INT assignment_expression | assignment_expression | init_for COMMA 
+ //assignment_expression;
+
+condition ::= IDENTIFIER relational_operators expr conditionP;
+conditionP ::= COMMA IDENTIFIER relational_operators expr conditionP
+			|
+			;
+
+//condition ::= condition COMMA IDENTIFIER relational_operators expr | IDENTIFIER relational_operators expr;
+function_call ::= IDENTIFIER LPAREN args RPAREN;
+function_call_statement ::= function_call SEMICOLON;
+
+increment ::= expr_increment incrementP;
+
+incrementP ::= COMMA expr_increment incrementP
+			|
+			;
+//increment ::= increment COMMA expr_increment | expr_increment;
+expr_increment ::= variable inc 
+				| inc_special variable;
+
+inc ::= MINUSEQ expr 
+	| MINUSMINUS 
+	| PLUSEQ expr 
+	| PLUSPLUS 
+	| DIVEQ expr 
+	| MULTEQ expr ;
+
+inc_special ::= PLUSPLUS 
+			| MINUSMINUS;
+
+args::= arg_list 
+		| ;
+
+arg_list ::= expr arg_listP 
+		;
+
+arg_listP ::= COMMA expr arg_listP
+			|
+			;
+//arg_list ::= arg_list COMMA expr | expr	;
