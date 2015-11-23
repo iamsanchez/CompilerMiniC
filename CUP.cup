@@ -29,9 +29,9 @@ terminal String Number;
 
 non terminal arg_list;
 non terminal args;
-non terminal assignment_expression;
-non terminal assignment_expressionP;
-non terminal assignment_statement;
+non terminal Assignment_Expression assignment_expression;
+non terminal Assignment_ExpressionP assignment_expressionP;
+non terminal Assignment_Statement assignment_statement;
 non terminal Boolean_Expression boolean_expression;
 non terminal condition;
 non terminal conditionP;
@@ -40,7 +40,7 @@ non terminal E1;
 non terminal E2;
 non terminal E3;
 non terminal expr_for;
-non terminal expr_increment;
+non terminal Expression_Increment expr_increment;
 non terminal Expression expr;
 non terminal ExpressionP exprP;
 non terminal Factor factor;
@@ -51,10 +51,11 @@ non terminal function_call_statement;
 //non terminal function_declaration;
 non terminal Function_Definition_List function_definition;
 non terminal If_Statement if_statement;
-non terminal inc;
-non terminal inc_special;
-non terminal increment;
-non terminal incrementP,arg_listP;
+non terminal Increment inc ;
+non terminal Increment_Special inc_special;
+non terminal IncrementI increment;
+non terminal IncrementP incrementP;
+non terminal arg_listP;
 non terminal init_for;
 non terminal init_forP;
 non terminal Jump_Statement jump_statement;
@@ -153,7 +154,7 @@ statement_list ::= statement_list:list statement:s {:list.add(s); RESULT = list;
 
 statement::= if_statement:s 							{:RESULT = s;:}
 		| jump_statement:s							{:RESULT = s;:}
-		| assignment_statement 
+		| assignment_statement:s 					{:RESULT = s;:}
 		| function_call_statement 
 		| for_statement
 		| variable_declaration:s 					{:RESULT = s;:}
@@ -212,15 +213,16 @@ function_definition ::= type:t IDENTIFIER:id LPAREN params:p RPAREN LBRACE state
 					;
 
 
-assignment_statement ::= assignment_expression SEMICOLON;
+assignment_statement ::= assignment_expression:a SEMICOLON		{:RESULT = new Assignment_Statement(a);:};
 
-assignment_expression ::= variable_initialization assignment_expressionP
-						| expr_increment assignment_expressionP
+assignment_expression ::= variable_initialization:v assignment_expressionP:a	{:RESULT = new Assignment_Expression_Var_Init(v,a);:}
+						| expr_increment:e assignment_expressionP:a					{:RESULT = new Assignment_Expression_Increment(e,a);:}
 						;
 
-assignment_expressionP ::= variable_initialization assignment_expressionP
-					| 
+assignment_expressionP ::= variable_initialization:v assignment_expressionP:a {:RESULT = new Assignment_ExpressionP_Var(v,a);:}
+					| 		{:RESULT = new Assignment_ExpressionP_Empty();:}
 						;						
+					
 //assignment_expression ::= variable_initialization| expr_increment | assignment_expression variable_initialization ;
 params ::= param_list:list 										{:RESULT = new Params(list);:}
 		| {:RESULT = new Params();:};
@@ -283,24 +285,25 @@ conditionP ::= COMMA IDENTIFIER relational_operators expr conditionP
 function_call ::= IDENTIFIER LPAREN args RPAREN;
 function_call_statement ::= function_call SEMICOLON;
 
-increment ::= expr_increment incrementP;
+ increment ::= expr_increment:e incrementP:i {:RESULT = new IncrementI(e,i);:};
 
-incrementP ::= COMMA expr_increment incrementP
-			|
+incrementP ::= COMMA expr_increment:e incrementP:i 		{:RESULT = new IncrementP_P(e,i);:}
+			|					{:RESULT = new IncrementP_Empty();:}
 			;
-//increment ::= increment COMMA expr_increment | expr_increment;
-expr_increment ::= variable inc 
-				| inc_special variable;
+//ino va ncrement ::= increment COMMA expr_increment | expr_increment;
 
-inc ::= MINUSEQ expr 
-	| MINUSMINUS 
-	| PLUSEQ expr 
-	| PLUSPLUS 
-	| DIVEQ expr 
-	| MULTEQ expr ;
+expr_increment ::= variable:v inc:i 	{:RESULT = new Expression_Increment_VarInc(v,i);:} 
+				| inc_special:i variable:v {:RESULT = new Expression_Increment_Special_Variable(v,i);	:};
 
-inc_special ::= PLUSPLUS 
-			| MINUSMINUS;
+inc ::= MINUSEQ expr:e  	{:RESULT = new Increment_MinEq(e);:}
+	| MINUSMINUS 		{:RESULT = new Increment_MinMin();:}
+	| PLUSEQ expr:e 	{:RESULT = new Increment_PlusEq(e);:} 
+	| PLUSPLUS 			{:RESULT = new Increment_PlusPlus();:}
+	| DIVEQ expr:e 		 {:RESULT = new Increment_DivEq(e);:}
+	| MULTEQ expr:e 	 {:RESULT = new Increment_MultEq(e);:};
+
+inc_special ::= PLUSPLUS 	{:RESULT = new Increment_Special_PP();:}
+			| MINUSMINUS 	{:RESULT = new Increment_Special_MM();:};
 
 args::= arg_list 
 		| ;

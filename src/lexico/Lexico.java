@@ -21,8 +21,10 @@ static public void main(String argv[]) throws IOException, Exception {
     String a[] = {"JFLEX.flex"};
     String b[] = {"CUP.cup"};
     jflex.Main.main(a);
+    System.out.println("No");
     java_cup.Main.main(b);
     
+    System.out.println("here?");
     	InputStream inStreamSYM = null;
         InputStream inStreamPARSER = null;
 	OutputStream outStreamSYM = null;
@@ -88,7 +90,7 @@ static public void main(String argv[]) throws IOException, Exception {
     	    e.printStackTrace();
     	}
         
-        
+        System.out.println("Llegue");
     parser p;
         try {
             

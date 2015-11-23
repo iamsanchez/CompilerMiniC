@@ -2,6 +2,27 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/lexico/sym.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/Increment_Special.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/Increment_Special_PP.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/Expression_Increment_VarInc.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/lexico/Lexico.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/IncrementP_Empty.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/IncrementP_P.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/Assignment_Statement.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/IncrementP.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/lexico/output.good</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/lexico/parser.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/Assignment_Expression_Var_Init.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/Assignment_ExpressionP_Var.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/Assignment_ExpressionP.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/Increment_Special_MM.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/ExpressionP.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/Assignment_Expression.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/Assignment_Expression_Increment.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/Expression_Increment_Special_Variable.java</file>
+            <file>file:/C:/Users/Agile-PC/Documents/NetBeansProjects/CompilerMiniC/src/AST/Assignment_ExpressionP_Empty.java</file>
+        </group>
     </open-files>
 </project-private>
